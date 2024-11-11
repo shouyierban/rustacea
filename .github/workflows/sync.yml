@@ -1,18 +1,41 @@
-name: Sync Fork
+name: Upstream Sync
+
+permissions:
+  contents: write
 
 on:
   schedule:
-    - cron: '20 0 * * *' # every 30 minutes
-  workflow_dispatch: # on button click
+    - cron: "25 0 * * *" # every day
+  workflow_dispatch:
 
 jobs:
-  sync:
-
+  sync_latest_from_upstream:
+    name: Sync latest commits from upstream repo
     runs-on: ubuntu-latest
+    if: ${{ github.event.repository.fork }}
 
     steps:
-      - uses: tgymnich/fork-sync@v2.0
+      # Step 1: run a standard checkout action
+      - name: Checkout target repo
+        uses: actions/checkout@v3
+
+      # Step 2: run the sync action
+      - name: Sync upstream changes
+        id: sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
         with:
-          token: ${{ secrets.PERSONAL_TOKEN }}
-          base: master
-          head: master
+          target_sync_branch: master
+          target_repo_token: ${{ secrets.RUST_TOKEN }}
+          upstream_sync_branch: master
+          upstream_sync_repo: mrcjkb/rustaceanvim
+
+          # Set test_mode true to run tests instead of the true action!!
+          test_mode: false
+
+      # Step 3: Display a sample message 
+      - name: Sync check
+        if: failure()
+        run: |
+          echo "::error::由于权限不足，导致同步失败（这是预期的行为），请前往仓库首页手动执行[Sync fork]。"
+          echo "::error::Due to insufficient permissions, synchronization failed (as expected). Please go to the repository homepage and manually perform [Sync fork]."
+          exit 1
