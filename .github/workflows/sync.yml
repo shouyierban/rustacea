@@ -2,7 +2,7 @@ name: Sync Fork
 
 on:
   schedule:
-    - cron: '30 0 * * *' # every 30 minutes
+    - cron: '20 0 * * *' # every 30 minutes
   workflow_dispatch: # on button click
 
 jobs:
@@ -13,6 +13,6 @@ jobs:
     steps:
       - uses: tgymnich/fork-sync@v2.0
         with:
-          token: ${{ secrets.RUST_TOKEN }}
+          token: ${{ secrets.PERSONAL_TOKEN }}
           base: master
           head: master
